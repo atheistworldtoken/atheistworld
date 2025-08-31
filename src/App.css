@@ -1,38 +1,187 @@
-.App {
+/* App.css */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+.bg-ethena-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.gradient-accent {
+  background: linear-gradient(90deg, #6b46c1, #4a90e2);
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-color: #6b46c1;
+  box-shadow: 0 0 8px rgba(107, 70, 193, 0.6);
+}
+
+button:hover:not(:disabled) {
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(107, 70, 193, 0.4);
+}
+
+.banner-img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  max-height: 300px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.animate-pulse::after {
+  content: '';
+  display: inline-block;
+  width: 1.2rem;
+  height: 1.2rem;
+  margin-left: 0.5rem;
+  border: 3px solid white;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s ease-in-out infinite;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.3s ease-in-out;
+}
+@keyframes slideDown {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-in-out;
+}
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.stats-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 1.5rem;
   text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease-in-out;
+}
+.stats-card:hover {
+  transform: translateY(-4px);
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.light .bg-ethena-bg {
+  background: #f5f5f5;
+}
+.light .text-white {
+  color: #000;
+}
+.light .bg-ethena-card {
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+.light .bg-gray-800 {
+  background: #e5e5e5;
+}
+.light .text-gray-400 {
+  color: #333;
+}
+.light .text-gray-300 {
+  color: #444;
+}
+.light .bg-gray-700 {
+  background: #ccc;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
+/* Added for scientific/rational theme */
+.scientific-quote {
+  font-style: italic;
+  color: #0d47a1; /* scientific-blue */
+  border-left: 4px solid #757575; /* rational-gray */
+  padding-left: 1rem;
+  margin: 1rem 0;
+}
+
+.reward-calculator {
+  background: rgba(13, 71, 161, 0.1); /* Light scientific-blue tint */
+  border: 1px solid #0d47a1;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+/* New styles for updated UI */
+.condition-list {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin-top: 0.5rem;
+  color: #757575; /* rational-gray */
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 200px;
+  background-color: #0d47a1; /* scientific-blue */
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -100px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+
+.price-update-section {
+  background: rgba(107, 70, 193, 0.1); /* Ethena accent tint */
+  border: 1px solid #6b46c1;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+@media (max-width: 768px) {
+  .banner-img {
+    max-height: 300px;
+    margin-top: 96px;
+  }
+  .stats-card {
+    padding: 1rem;
+    font-size: 1.1rem;
+  }
+  .banner-img {
+    margin-top: 96px;
   }
 }
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+@media (max-width: 414px) {
+  .banner-img {
+    margin-top: 96px;
   }
-  to {
-    transform: rotate(360deg);
+  .animate-slide-in {
+    top: 24px;
+  }
+  .text-lg {
+    font-size: 1.1rem;
   }
 }
