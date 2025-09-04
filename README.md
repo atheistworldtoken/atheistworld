@@ -14,4 +14,4 @@ A React app for interacting with the AWT smart contract.
 Website: https://atheistworldtoken.com/
 Discord: https://discord.gg/e2XYg2pw
 Telegram: https://t.me/+uJikM5E5HzkwNTE1
-X: https://x.com/teamawt
+X: https://x.com/teamawt"# awt1" 
