@@ -57,11 +57,11 @@ function App() {
   const [awtUsdPrice, setAwtUsdPrice] = useState(0);
   const [isOwner, setIsOwner] = useState(false);
 
-  // New states for dynamic min/max values (hard-coded as per contract)
-  const [minBuyAmount, setMinBuyAmount] = useState(0.1);
-  const [maxBuyPerWallet, setMaxBuyPerWallet] = useState(1000); // Updated to 1000 as per contract
-  const [minStakeAmount, setMinStakeAmount] = useState(1);
-  const [maxStakePerUser, setMaxStakePerUser] = useState(1000); // Updated to 1000 as per contract
+  // New states for dynamic min/max values
+  const [minBuyAmount, setMinBuyAmount] = useState(0);
+  const [maxBuyPerWallet, setMaxBuyPerWallet] = useState(0);
+  const [minStakeAmount, setMinStakeAmount] = useState(0);
+  const [maxStakePerUser, setMaxStakePerUser] = useState(0);
 
   // New states for owner inputs to change parameters
   const [newWelcomeBonus, setNewWelcomeBonus] = useState(0);
@@ -72,10 +72,10 @@ function App() {
   const [newMaxRefs, setNewMaxRefs] = useState(0);
   const [newMaxRewardPerRef, setNewMaxRewardPerRef] = useState(0);
   const [newMinStakeTime, setNewMinStakeTime] = useState(0);
-  const [newMinBuyAmount, setNewMinBuyAmount] = useState(0.1);
-  const [newMaxBuyPerWallet, setNewMaxBuyPerWallet] = useState(1000);
-  const [newMinStakeAmount, setNewMinStakeAmount] = useState(1);
-  const [newMaxStakePerUser, setNewMaxStakePerUser] = useState(1000);
+  const [newMinBuyAmount, setNewMinBuyAmount] = useState(0);
+  const [newMaxBuyPerWallet, setNewMaxBuyPerWallet] = useState(0);
+  const [newMinStakeAmount, setNewMinStakeAmount] = useState(0);
+  const [newMaxStakePerUser, setNewMaxStakePerUser] = useState(0);
 
   // Reward calculator states
   const [calcStakeAmount, setCalcStakeAmount] = useState('');
@@ -217,7 +217,7 @@ function App() {
     if (contract) {
       const pollInterval = setInterval(async () => {
         await updateContractData(contract);
-      }, 600000); // Changed to 10 minutes to reduce loading/blinking
+      }, 60000); // Changed to 1 minute for faster updates
       return () => clearInterval(pollInterval);
     }
   }, [contract]);
@@ -536,20 +536,64 @@ function App() {
         setNotification(`Exchange rate updated to ${ethers.formatEther(newRate)} BNB per AWT!`);
         await updateContractData(cont);
       });
-      // Assuming additional events for parameter changes (based on common patterns)
-      wsContract.on('StakeAPRUpdated', (oldAPR, newAPR) => {
+      wsContract.on('StakeAPRUpdated', async (oldAPR, newAPR) => {
         const aprPercent = (Number(newAPR) / 10000 * 100).toFixed(0);
         setStakeAPR(Number(newAPR) / 10000);
         setNotification(`Stake APR updated to ${aprPercent}%!`);
-        updateContractData(cont);
+        await updateContractData(cont);
       });
-      wsContract.on('RefereeDiscountRateUpdated', (oldRate, newRate) => {
+      wsContract.on('RefereeDiscountRateUpdated', async (oldRate, newRate) => {
         const discountPercent = (Number(newRate) / 10000 * 100).toFixed(0);
         setRefereeDiscountRate(Number(newRate) / 10000);
         setNotification(`Referee discount rate updated to ${discountPercent}%!`);
-        updateContractData(cont);
+        await updateContractData(cont);
       });
-      // Add more assumed events if needed
+      wsContract.on('BonusUpdated', async (bonus) => {
+        setWelcomeBonus(ethers.formatEther(bonus));
+        setNotification('Welcome bonus updated!');
+        await updateContractData(cont);
+      });
+      wsContract.on('MinBonusBalanceUpdated', async (oldMin, newMin) => {
+        setMinBonusBalance(ethers.formatEther(newMin));
+        setNotification('Min bonus balance updated!');
+        await updateContractData(cont);
+      });
+      wsContract.on('MaxBonusBalanceUpdated', async (oldMax, newMax) => {
+        setMaxBonusBalance(ethers.formatEther(newMax));
+        setNotification('Max bonus balance updated!');
+        await updateContractData(cont);
+      });
+      wsContract.on('MaxRefsUpdated', async (oldMax, newMax) => {
+        setMaxRefs(Number(newMax));
+        setNotification('Max referrals updated!');
+        await updateContractData(cont);
+      });
+      wsContract.on('MaxRewardPerRefUpdated', async (oldMax, newMax) => {
+        setMaxRewardPerRef(ethers.formatEther(newMax));
+        setNotification('Max reward per ref updated!');
+        await updateContractData(cont);
+      });
+      wsContract.on('MinStakeUpdated', async (oldAmt, oldTime, newAmt, newTime) => {
+        setMinStakeAmount(ethers.formatEther(newAmt));
+        setMinStakeTime(Number(newTime));
+        setNotification('Min stake requirements updated!');
+        await updateContractData(cont);
+      });
+      wsContract.on('MinBuyReqUpdated', async (oldAmt, oldEnabled, newAmt, newEnabled) => {
+        setMinBuyAmount(ethers.formatEther(newAmt));
+        setNotification('Min buy requirements updated!');
+        await updateContractData(cont);
+      });
+      wsContract.on('MaxBuyPerWalletSet', async (oldAmt, newAmt) => {
+        setMaxBuyPerWallet(ethers.formatEther(newAmt));
+        setNotification('Max buy per wallet updated!');
+        await updateContractData(cont);
+      });
+      wsContract.on('MaxStakeAmtUpdated', async (oldMax, newMax) => {
+        setMaxStakePerUser(ethers.formatEther(newMax));
+        setNotification('Max stake per user updated!');
+        await updateContractData(cont);
+      });
 
       setNotification('Wallet connected successfully!');
     } catch (error) {
@@ -656,9 +700,18 @@ function App() {
       const usdPrice = await cont.awtUsdPrice();
       setAwtUsdPrice(Number(usdPrice) / 1e8);
 
-      // Update hard-coded based on contract values as per user
-      setMaxBuyPerWallet(1000);
-      setMaxStakePerUser(1000);
+      // Fetch dynamic min/max values from contract
+      const minBuy = await cont.minBuy();
+      setMinBuyAmount(ethers.formatEther(minBuy));
+
+      const maxBuyPw = await cont.maxBuyPerWallet();
+      setMaxBuyPerWallet(ethers.formatEther(maxBuyPw));
+
+      const minStake = await cont.minStake();
+      setMinStakeAmount(ethers.formatEther(minStake));
+
+      const maxStakePu = await cont.maxStakeAmt();
+      setMaxStakePerUser(ethers.formatEther(maxStakePu));
 
       // Fetch performance metrics (assuming getters exist in contract)
       try {
@@ -682,32 +735,32 @@ function App() {
   };
 
   const fetchTransactionHistory = async () => {
-  if (!contract || !account) return;
-  setIsFetchingHistory(true);
-  try {
-    const currentBlock = await provider.getBlockNumber();
-    const fromBlock = Math.max(0, currentBlock - 500000); // Increased to ~1.5 months; adjust as needed
-    const events = await contract.queryFilter('*', fromBlock, 'latest');
-    const userEvents = events.filter(e => 
-      (e.args?.user && e.args.user.toLowerCase() === account.toLowerCase()) ||
-      (e.args?.from && e.args.from.toLowerCase() === account.toLowerCase()) ||
-      (e.args?.to && e.args.to.toLowerCase() === account.toLowerCase()) ||
-      (e.args?.referrer && e.args.referrer.toLowerCase() === account.toLowerCase())
-    );
-    const history = userEvents.map(e => ({
-      event: e.event,
-      args: e.args,
-      block: e.blockNumber,
-      tx: e.transactionHash
-    }));
-    setTransactionHistory(history);
-  } catch (error) {
-    console.error('fetchHistory error:', error);
-    setErrorMsg('Failed to fetch history: ' + (error.reason || error.shortMessage || error.message || 'Try increasing the block range or check network'));
-  } finally {
-    setIsFetchingHistory(false);
-  }
-};
+    if (!contract || !account) return;
+    setIsFetchingHistory(true);
+    try {
+      const currentBlock = await provider.getBlockNumber();
+      const fromBlock = Math.max(0, currentBlock - 500000); // Increased to ~1.5 months; adjust as needed
+      const events = await contract.queryFilter('*', fromBlock, 'latest');
+      const userEvents = events.filter(e => 
+        (e.args?.user && e.args.user.toLowerCase() === account.toLowerCase()) ||
+        (e.args?.from && e.args.from.toLowerCase() === account.toLowerCase()) ||
+        (e.args?.to && e.args.to.toLowerCase() === account.toLowerCase()) ||
+        (e.args?.referrer && e.args.referrer.toLowerCase() === account.toLowerCase())
+      );
+      const history = userEvents.map(e => ({
+        event: e.event,
+        args: e.args,
+        block: e.blockNumber,
+        tx: e.transactionHash
+      }));
+      setTransactionHistory(history);
+    } catch (error) {
+      console.error('fetchHistory error:', error);
+      setErrorMsg('Failed to fetch history: ' + (error.reason || error.shortMessage || error.message || 'Try increasing the block range or check network'));
+    } finally {
+      setIsFetchingHistory(false);
+    }
+  };
 
   const calculateBnbRequired = () => {
     const awtNum = parseFloat(awtAmount) || 0;
@@ -929,7 +982,7 @@ function App() {
     if (!contract || !isOwner) return;
     try {
       const bonusWei = ethers.parseUnits(newWelcomeBonus.toString(), 18);
-      const tx = await contract.setWelcomeBonus(bonusWei);
+      const tx = await contract.setBonus(bonusWei);
       await tx.wait();
       setNotification('Welcome bonus updated!');
       await updateContractData(contract);
@@ -1029,7 +1082,7 @@ function App() {
     if (!contract || !isOwner) return;
     try {
       const minWei = ethers.parseUnits(newMinBuyAmount.toString(), 18);
-      const tx = await contract.setMinBuyAmount(minWei);
+      const tx = await contract.setMinBuy(minWei, true); // Assuming setMinBuyReq(amt, enabled)
       await tx.wait();
       setNotification('Min buy amount updated!');
       await updateContractData(contract);
@@ -1055,7 +1108,7 @@ function App() {
     if (!contract || !isOwner) return;
     try {
       const minWei = ethers.parseUnits(newMinStakeAmount.toString(), 18);
-      const tx = await contract.setMinStakeAmount(minWei);
+      const tx = await contract.setMinStakeReq(minWei, minStakeTime); // Assuming setMinStakeReq(amt, time)
       await tx.wait();
       setNotification('Min stake amount updated!');
       await updateContractData(contract);
@@ -1068,7 +1121,7 @@ function App() {
     if (!contract || !isOwner) return;
     try {
       const maxWei = ethers.parseUnits(newMaxStakePerUser.toString(), 18);
-      const tx = await contract.setMaxStakePerUser(maxWei);
+      const tx = await contract.setMaxStakeAmt(maxWei);
       await tx.wait();
       setNotification('Max stake per user updated!');
       await updateContractData(contract);
@@ -2087,7 +2140,7 @@ function App() {
             <div>
               <h3 className="text-xl font-semibold mb-2">Why is the UI not updating immediately?</h3>
               <p className={textSecondary}>
-                UI polls contract every 10 minutes for updates to avoid frequent loading. Real-time changes via events (e.g., APR update) will notify and refresh data. Use: Wait or manual refresh if needed. Conditions: WebSocket for events.
+                UI polls contract every 1 minute for updates to avoid frequent loading. Real-time changes via events (e.g., APR update) will notify and refresh data. Use: Wait or manual refresh if needed. Conditions: WebSocket for events.
               </p>
             </div>
           </div>
