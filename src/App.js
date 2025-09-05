@@ -2198,6 +2198,13 @@ function App() {
               </div>
             </div>
             <div className={`p-4 ${bgSubCard} rounded-lg shadow-md transition-transform duration-300 hover:scale-105`}>
+              <h3 className="text-xl font-semibold mb-2">AWT Whitepaper (Hindi)</h3>
+              <div className="flex gap-4">
+                <a href="/Atheist World Token (AWT) Whitepaper_Hindi.pdf" target="_blank" rel="noopener noreferrer" className="bg-info-blue text-white px-4 py-2 rounded hover:opacity-90">View</a>
+                <a href="/Atheist World Token (AWT) Whitepaper_Hindi.pdf" download className="bg-green-600 text-white px-4 py-2 rounded hover:opacity-90">Download</a>
+              </div>
+            </div>
+            <div className={`p-4 ${bgSubCard} rounded-lg shadow-md transition-transform duration-300 hover:scale-105`}>
               <h3 className="text-xl font-semibold mb-2">AWT Roadmap</h3>
               <div className="flex gap-4">
                 <a href="/AWT_Roadmap.pdf" target="_blank" rel="noopener noreferrer" className="bg-info-blue text-white px-4 py-2 rounded hover:opacity-90">View</a>
@@ -2261,7 +2268,7 @@ function App() {
       <footer className="gradient-accent text-center text-white p-6 shadow-lg">
         <p className="mb-4">Join our community:</p>
         <div className="flex justify-center gap-8">
-          <a href="https://discord.gg/e2XYg2pw" target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition" aria-label="Discord"><FaDiscord size={28} /></a>
+          <a href="https://discord.gg/yRmv2UXk" target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition" aria-label="Discord"><FaDiscord size={28} /></a>
           <a href="https://t.me/+uJikM5E5HzkwNTE1" target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition" aria-label="Telegram"><FaTelegramPlane size={28} /></a>
           <a href="https://x.com/teamawt" target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition" aria-label="Twitter"><FaTwitter size={28} /></a>
           <a href="mailto:atheistworldtoken@gmail.com" className="hover:opacity-70 transition" aria-label="Email"><FaEnvelope size={28} /></a>
