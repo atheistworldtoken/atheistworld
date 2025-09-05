@@ -739,7 +739,7 @@ function App() {
     setIsFetchingHistory(true);
     try {
       const currentBlock = await provider.getBlockNumber();
-      const fromBlock = Math.max(0, currentBlock - 500000); // Increased to ~1.5 months; adjust as needed
+      const fromBlock = Math.max(0, currentBlock - 1000000); // Increased to ~1 month; adjust as needed
       const events = await contract.queryFilter('*', fromBlock, 'latest');
       const userEvents = events.filter(e => 
         (e.args?.user && e.args.user.toLowerCase() === account.toLowerCase()) ||
@@ -776,8 +776,8 @@ function App() {
       setErrorMsg('Wallet not connected!');
       return;
     }
-    const awtNum = parseFloat(awtAmount);
-    if (isNaN(awtNum) || awtNum < minBuyAmount || awtNum > maxBuyPerWallet) {
+    const awtNum = parseFloat(awtAmount) || 0;
+    if (awtNum < minBuyAmount || awtNum > maxBuyPerWallet) {
       setErrorMsg(`Enter a valid AWT amount between ${minBuyAmount} and ${maxBuyPerWallet}!`);
       return;
     }
@@ -808,9 +808,9 @@ function App() {
       setErrorMsg('Wallet not connected!');
       return;
     }
-    const stakeNum = parseFloat(stakeAmount);
-    if (isNaN(stakeNum) || stakeNum < minStakeAmount || stakeNum > parseFloat(balance) || (maxStakePerUser > 0 && (parseFloat(userStaked) + stakeNum) > maxStakePerUser)) {
-      setErrorMsg(`Enter a valid AWT amount between ${minStakeAmount} and your balance${maxStakePerUser > 0 ? `, total stake <= ${maxStakePerUser}` : ''}!`);
+    const stakeNum = parseFloat(stakeAmount) || 0;
+    if (stakeNum < minStakeAmount || stakeNum > parseFloat(balance) || (maxStakePerUser > 0 && (parseFloat(userStaked) + stakeNum) > maxStakePerUser)) {
+      setErrorMsg(`Enter a valid AWT amount between ${minStakeAmount} and your balance${maxStakePerUser > 0 ? `, total stake &lt;= ${maxStakePerUser}` : ''}!`);
       return;
     }
     setLoading({ ...loading, stake: true });
@@ -834,8 +834,8 @@ function App() {
       setErrorMsg('Wallet not connected!');
       return;
     }
-    const unstakeNum = parseFloat(unstakeAmount);
-    if (isNaN(unstakeNum) || unstakeNum <= 0 || unstakeNum > parseFloat(userStaked)) {
+    const unstakeNum = parseFloat(unstakeAmount) || 0;
+    if (unstakeNum <= 0 || unstakeNum > parseFloat(userStaked)) {
       setErrorMsg('Enter a valid positive AWT amount within your staked balance!');
       return;
     }
@@ -1197,6 +1197,19 @@ function App() {
   const bgSubCard = theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200';
   const bgProgress = theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300';
 
+  // Validation for buy
+  const awtNum = parseFloat(awtAmount) || 0;
+  const isValidAwtAmount = awtNum >= minBuyAmount && awtNum <= maxBuyPerWallet;
+  const isValidReferrer = !referrer || ethers.isAddress(referrer);
+
+  // Validation for stake
+  const stakeNum = parseFloat(stakeAmount) || 0;
+  const isValidStakeAmount = stakeNum >= minStakeAmount && stakeNum <= parseFloat(balance) && (maxStakePerUser === 0 || (parseFloat(userStaked) + stakeNum) <= maxStakePerUser);
+
+  // Validation for unstake
+  const unstakeNum = parseFloat(unstakeAmount) || 0;
+  const isValidUnstakeAmount = unstakeNum > 0 && unstakeNum <= parseFloat(userStaked);
+
   return (
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-ethena-bg text-white' : 'bg-white text-black'} font-sans relative`}>
       <Joyride
@@ -1462,10 +1475,7 @@ function App() {
                   <input
                     type="number"
                     value={awtAmount}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (val >= minBuyAmount && val <= maxBuyPerWallet) setAwtAmount(val);
-                    }}
+                    onChange={(e) => setAwtAmount(e.target.value)}
                     className={`w-full ${bgInput} ${textInput} border ${borderInput} rounded p-2 mb-4 focus:ring-2 focus:ring-ethena-accent`}
                     placeholder="Enter AWT amount"
                     min={minBuyAmount}
@@ -1473,6 +1483,7 @@ function App() {
                     step="0.1"
                     aria-label="AWT Amount"
                   />
+                  {!isValidAwtAmount && awtAmount && <p className="text-error-red text-sm mb-2">Amount must be between {minBuyAmount} and {maxBuyPerWallet}</p>}
                   <input
                     type="text"
                     value={referrer}
@@ -1481,13 +1492,14 @@ function App() {
                     placeholder="Enter Referrer Address (optional)"
                     aria-label="Referrer Address"
                   />
+                  {!isValidReferrer && referrer && <p className="text-error-red text-sm mb-2">Invalid referrer address</p>}
                   <p className={`${textSecondary} text-sm mb-2`}>Required BNB: {calculateBnbRequired()} BNB</p>
                   <p className={`${textSecondary} text-sm mb-2`}>Expected AWT: {(parseFloat(awtAmount || 0) + parseFloat(expectedDiscount || 0)).toFixed(2)}</p>
                   <p className={`${textSecondary} text-sm mb-4`}>Estimated Gas: {gasEstimateBuy}</p>
                   <button
                     onClick={buyAWT}
-                    disabled={loading.buy}
-                    className={`w-full bg-gradient-to-r from-ethena-accent to-blue-500 ${textPrimary} px-4 py-2 rounded hover:scale-105 transition shadow-md ${loading.buy ? 'animate-pulse' : ''}`}
+                    disabled={loading.buy || !isValidAwtAmount || !isValidReferrer}
+                    className={`w-full bg-gradient-to-r from-ethena-accent to-blue-500 ${textPrimary} px-4 py-2 rounded hover:scale-105 transition shadow-md ${loading.buy || !isValidAwtAmount || !isValidReferrer ? 'opacity-50 cursor-not-allowed' : ''}`}
                     aria-label="Buy AWT"
                   >
                     {loading.buy ? 'Buying...' : 'Buy AWT'}
@@ -1552,20 +1564,18 @@ function App() {
               <input
                 type="number"
                 value={stakeAmount}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  if (val >= minStakeAmount && val <= parseFloat(balance) && (maxStakePerUser === 0 || parseFloat(userStaked) + parseFloat(val) <= maxStakePerUser)) setStakeAmount(val);
-                }}
+                onChange={(e) => setStakeAmount(e.target.value)}
                 className={`w-full ${bgInput} ${textInput} border ${borderInput} rounded p-2 mb-4 focus:ring-2 focus:ring-ethena-accent`}
                 placeholder="Enter AWT amount"
                 min={minStakeAmount}
                 step="0.1"
                 aria-label="Stake Amount"
               />
+              {!isValidStakeAmount && stakeAmount && <p className="text-error-red text-sm mb-2">Amount must be between {minStakeAmount} and your balance{maxStakePerUser > 0 ? `, total stake &lt;= ${maxStakePerUser}` : ''}</p>}
               <button
                 onClick={stake}
-                disabled={loading.stake}
-                className={`w-full bg-gradient-to-r from-ethena-accent to-blue-500 ${textPrimary} px-4 py-2 rounded hover:scale-105 transition shadow-md ${loading.stake ? 'animate-pulse' : ''}`}
+                disabled={loading.stake || !isValidStakeAmount}
+                className={`w-full bg-gradient-to-r from-ethena-accent to-blue-500 ${textPrimary} px-4 py-2 rounded hover:scale-105 transition shadow-md ${loading.stake || !isValidStakeAmount ? 'opacity-50 cursor-not-allowed' : ''}`}
                 aria-label="Stake AWT"
               >
                 {loading.stake ? 'Staking...' : 'Stake AWT'}
@@ -1599,20 +1609,18 @@ function App() {
               <input
                 type="number"
                 value={unstakeAmount}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  if (val >= 0.1 && val <= parseFloat(userStaked)) setUnstakeAmount(val);
-                }}
+                onChange={(e) => setUnstakeAmount(e.target.value)}
                 className={`w-full ${bgInput} ${textInput} border ${borderInput} rounded p-2 mb-4 focus:ring-2 focus:ring-ethena-accent`}
                 placeholder="Enter AWT amount"
                 min="0.1"
                 step="0.1"
                 aria-label="Unstake Amount"
               />
+              {!isValidUnstakeAmount && unstakeAmount && <p className="text-error-red text-sm mb-2">Amount must be positive and &lt;= {userStaked}</p>}
               <button
                 onClick={unstake}
-                disabled={loading.unstake || remainingLock > 0}
-                className={`w-full bg-red-600 ${textPrimary} px-4 py-2 rounded hover:scale-105 transition shadow-md ${loading.unstake || remainingLock > 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                disabled={loading.unstake || !isValidUnstakeAmount || remainingLock > 0}
+                className={`w-full bg-red-600 ${textPrimary} px-4 py-2 rounded hover:scale-105 transition shadow-md ${loading.unstake || !isValidUnstakeAmount || remainingLock > 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
                 aria-label="Unstake AWT"
               >
                 {loading.unstake ? 'Unstaking...' : 'Unstake AWT'}
