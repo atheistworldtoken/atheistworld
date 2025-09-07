@@ -1151,7 +1151,7 @@ function App() {
       setErrorMsg('Feedback cannot be empty!');
       return;
     }
-    const mailtoLink = `mailto:atheistworldtoken@gmail.com?subject=User Feedback&body=${encodeURIComponent(feedbackText)}`;
+    const mailtoLink = `mailto:help@atheistworldtoken.com?subject=User Feedback&body=${encodeURIComponent(feedbackText)}`;
     window.location.href = mailtoLink;
     setNotification('Opening email client for feedback...');
     setShowFeedback(false);
@@ -2279,7 +2279,7 @@ function App() {
           <a href="https://discord.gg/yRmv2UXk" target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition" aria-label="Discord"><FaDiscord size={28} /></a>
           <a href="https://t.me/+uJikM5E5HzkwNTE1" target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition" aria-label="Telegram"><FaTelegramPlane size={28} /></a>
           <a href="https://x.com/teamawt" target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition" aria-label="Twitter"><FaTwitter size={28} /></a>
-          <a href="mailto:atheistworldtoken@gmail.com" className="hover:opacity-70 transition" aria-label="Email"><FaEnvelope size={28} /></a>
+          <a href="mailto:help@atheistworldtoken.com" className="hover:opacity-70 transition" aria-label="Email"><FaEnvelope size={28} /></a>
         </div>
         <button onClick={() => setShowFeedback(true)} className="mt-4 text-sm underline" aria-label="Give Feedback">Give Feedback</button>
         <p className="mt-6 text-sm">© 2025 AtheistWorldToken. All rights reserved.</p>
