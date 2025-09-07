@@ -217,7 +217,7 @@ function App() {
     if (contract) {
       const pollInterval = setInterval(async () => {
         await updateContractData(contract);
-      }, 60000); // Changed to 1 minute for faster updates
+      }, 600000); // Changed to 1 minute for faster updates
       return () => clearInterval(pollInterval);
     }
   }, [contract]);
