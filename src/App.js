@@ -1292,6 +1292,9 @@ function App() {
 
       <main className="p-4 md:p-8">
         <section ref={homeRef} className={`text-center mb-12 py-16 rounded-lg ${bgCard} shadow-xl animate-fade-in`}>
+                <h3 className="text-2xl font-semibold mb-4 text-center">Token Contract URL</h3>
+                                                    <p className={`${textSecondary} text-center mb-4`}>https://bscscan.com/token/0x11d2e5fb3eb729fc829baee1d2ada09bfa4ec4d7</p>
+                <ul className="condition-list text-center mx-auto max-w-2xl"></ul>
           <h1 className="text-4xl md:text-5xl font-bold mb-4">AtheistWorldToken</h1>
           <p className={`text-lg md:text-2xl ${textSecondary} mb-6`}>Grow your wealth with staking and referrals on the blockchain.</p>
           <button onClick={() => scrollToSection(buyRef)} className="bg-gradient-to-r from-ethena-accent to-blue-500 text-white px-6 py-3 rounded-full hover:scale-105 transition font-semibold shadow-md" aria-label="Start Earning">
