@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ethers } from 'ethers';
 import Joyride from 'react-joyride';
-import { FaDiscord, FaTelegramPlane, FaTwitter, FaEnvelope, FaBars, FaInfoCircle, FaAdjust, FaSpinner, FaTimes } from 'react-icons/fa';
+import { FaDiscord, FaTelegramPlane, FaTwitter, FaEnvelope, FaBars, FaInfoCircle, FaAdjust, FaSpinner, FaTimes, FaGithub } from 'react-icons/fa';
 import { ABI, CONTRACT_ADDRESS } from './MyContractAbi';
 import Chart from 'chart.js/auto';
 import './App.css';
@@ -469,6 +469,19 @@ function App() {
     };
     calculateProjectedReward();
   }, [calcStakeAmount, calcDurationMonths, stakeAPR]);
+
+  // UPDATED: Outside click to close mobile menu - Refined for specificity
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isMobileMenuOpen && !event.target.closest('.mobile-nav')) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+    if (isMobileMenuOpen) {
+      document.addEventListener('click', handleClickOutside);
+    }
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [isMobileMenuOpen]);
 
   const connectWallet = async () => {
     if (!provider) {
@@ -1196,6 +1209,13 @@ function App() {
   const textInput = theme === 'dark' ? 'text-white' : 'text-black';
   const bgSubCard = theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200';
   const bgProgress = theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300';
+  const headerBg = theme === 'dark' ? 'gradient-accent shadow-lg' : 'bg-white shadow-lg border-b border-gray-200';
+  const headerText = theme === 'dark' ? 'text-white hover:text-gray-300' : 'text-black hover:text-gray-700';
+  const headerAccountText = theme === 'dark' ? 'text-white' : 'text-black';
+  const mobileMenuBg = theme === 'dark' ? 'bg-ethena-card' : 'bg-white';
+  const mobileMenuText = theme === 'dark' ? 'text-white' : 'text-black';
+  const mobileMenuHover = theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-200';
+  const footerBg = theme === 'dark' ? 'gradient-accent' : 'bg-gray-800';
 
   // Validation for buy
   const awtNum = parseFloat(awtAmount) || 0;
@@ -1211,7 +1231,7 @@ function App() {
   const isValidUnstakeAmount = unstakeNum > 0 && unstakeNum <= parseFloat(userStaked);
 
   return (
-    <div className={`min-h-screen ${theme === 'dark' ? 'bg-ethena-bg text-white' : 'bg-white text-black'} font-sans relative`}>
+    <div className={`min-h-screen overflow-x-hidden ${theme === 'dark' ? 'bg-ethena-bg text-white' : 'bg-white text-black'} font-sans relative`}>
       <Joyride
         steps={joyrideSteps}
         run={runTour}
@@ -1230,71 +1250,104 @@ function App() {
         </div>
       )}
 
-      <header className="fixed top-0 left-0 right-0 gradient-accent z-50 p-4 flex items-center justify-between shadow-lg">
+      {/* UPDATED HEADER: Hamburger moved to right div for better positioning, added stopPropagation */}
+      <header className={`fixed top-0 left-0 right-0 ${headerBg} z-50 p-4 flex items-center justify-between`}>
         <div className="flex items-center">
           <img src="/logo.png" alt="AtheistWorldToken Logo" loading="lazy" className="h-10 md:h-12 object-contain transition-transform duration-300 hover:scale-105" onError={(e) => { e.target.src = '/logo-fallback.png'; console.error('Logo load error'); }} />
           <nav className="hidden md:flex ml-6 gap-6">
-            <button onClick={() => scrollToSection(homeRef)} className="text-white hover:text-gray-300 transition" aria-label="Home">Home</button>
-            <button onClick={() => scrollToSection(howItWorksRef)} className="text-white hover:text-gray-300 transition" aria-label="How It Works">How It Works</button>
-            <button onClick={() => scrollToSection(buyRef)} className="text-white hover:text-gray-300 transition" aria-label="Buy & Refer">Buy & Refer</button>
-            <button onClick={() => scrollToSection(stakeRef)} className="text-white hover:text-gray-300 transition" aria-label="Stake">Stake</button>
-            <button onClick={() => scrollToSection(claimRef)} className="text-white hover:text-gray-300 transition" aria-label="Claim Rewards">Claim Rewards</button>
-            {isOwner && <button onClick={() => scrollToSection(priceUpdateRef)} className="text-white hover:text-gray-300 transition" aria-label="Price Update">Price Update</button>}
-            <button onClick={() => scrollToSection(rewardCalcRef)} className="text-white hover:text-gray-300 transition" aria-label="Reward Calculator">Reward Calculator</button>
-            <button onClick={() => scrollToSection(faqRef)} className="text-white hover:text-gray-300 transition" aria-label="FAQ">FAQ</button>
-            <button onClick={() => scrollToSection(historyRef)} className="text-white hover:text-gray-300 transition" aria-label="Transaction History">Transaction History</button>
-            <button onClick={() => scrollToSection(metricsRef)} className="text-white hover:text-gray-300 transition" aria-label="Performance Metrics">Performance Metrics</button>
-            <button onClick={() => scrollToSection(documentsRef)} className="text-white hover:text-gray-300 transition" aria-label="Documents">Documents</button>
+            <button onClick={() => scrollToSection(homeRef)} className={`${headerText} transition`} aria-label="Home">Home</button>
+            <button onClick={() => scrollToSection(howItWorksRef)} className={`${headerText} transition`} aria-label="How It Works">How It Works</button>
+            <button onClick={() => scrollToSection(buyRef)} className={`${headerText} transition`} aria-label="Buy & Refer">Buy & Refer</button>
+            <button onClick={() => scrollToSection(stakeRef)} className={`${headerText} transition`} aria-label="Stake">Stake</button>
+            <button onClick={() => scrollToSection(claimRef)} className={`${headerText} transition`} aria-label="Claim Rewards">Claim Rewards</button>
+            {isOwner && <button onClick={() => scrollToSection(priceUpdateRef)} className={`${headerText} transition`} aria-label="Price Update">Price Update</button>}
+            <button onClick={() => scrollToSection(rewardCalcRef)} className={`${headerText} transition`} aria-label="Reward Calculator">Reward Calculator</button>
+            <button onClick={() => scrollToSection(faqRef)} className={`${headerText} transition`} aria-label="FAQ">FAQ</button>
+            <button onClick={() => scrollToSection(historyRef)} className={`${headerText} transition`} aria-label="Transaction History">Transaction History</button>
+            <button onClick={() => scrollToSection(metricsRef)} className={`${headerText} transition`} aria-label="Performance Metrics">Performance Metrics</button>
+            <button onClick={() => scrollToSection(documentsRef)} className={`${headerText} transition`} aria-label="Documents">Documents</button>
             <button onClick={toggleTheme} aria-label="Toggle Theme"><FaAdjust size={20} /></button>
           </nav>
         </div>
-        <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 connect-wallet">
-          {account ? (
-            <>
-              <p className="text-white text-sm truncate max-w-[150px] md:max-w-none">
-                {account.slice(0, 6)}...{account.slice(-4)} | {parseFloat(balance).toFixed(2)} AWT
-              </p>
-              <button onClick={disconnectWallet} className="bg-white text-ethena-accent px-3 py-1 rounded-lg hover:opacity-90 transition" aria-label="Disconnect Wallet">
-                Disconnect
+        <div className="flex items-center gap-4">
+          <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 connect-wallet">
+            {account ? (
+              <>
+                <p className={`${headerAccountText} text-sm truncate max-w-[150px] md:max-w-none`}>
+                  {account.slice(0, 6)}...{account.slice(-4)} | {parseFloat(balance).toFixed(2)} AWT
+                </p>
+                <button onClick={disconnectWallet} className="bg-white text-ethena-accent px-3 py-1 rounded-lg hover:opacity-90 transition" aria-label="Disconnect Wallet">
+                  Disconnect
+                </button>
+              </>
+            ) : (
+              <button onClick={connectWallet} className="bg-white text-ethena-accent px-3 py-1 rounded-lg hover:opacity-90 transition" aria-label="Connect Wallet">
+                Connect Wallet
               </button>
-            </>
-          ) : (
-            <button onClick={connectWallet} className="bg-white text-ethena-accent px-3 py-1 rounded-lg hover:opacity-90 transition" aria-label="Connect Wallet">
-              Connect Wallet
-            </button>
-          )}
+            )}
+          </div>
+          {/* UPDATED: Added stopPropagation, padding, and hover for better UX */}
+          <button 
+            className={`${headerAccountText} md:hidden p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition`} 
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent event bubbling to document
+              setIsMobileMenuOpen(!isMobileMenuOpen);
+            }} 
+            aria-label="Toggle Menu"
+          >
+            <FaBars size={28} />
+          </button>
         </div>
-        <button className="md:hidden text-white" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} aria-label="Open Menu">
-          <FaBars size={28} />
-        </button>
       </header>
 
+      {/* UPDATED MOBILE MENU: Higher z-index z-[60], top-[80px], added close button, class 'mobile-nav' for outside click, pt-8 in ul */}
       {isMobileMenuOpen && (
-        <nav className="md:hidden fixed top-[72px] left-0 right-0 bg-ethena-card p-4 z-40 shadow-lg animate-slide-down">
-          <ul className="space-y-4 text-center">
-            <li><button onClick={() => scrollToSection(homeRef)} className="text-white w-full py-2 hover:bg-gray-700 rounded" aria-label="Home">Home</button></li>
-            <li><button onClick={() => scrollToSection(howItWorksRef)} className="text-white w-full py-2 hover:bg-gray-700 rounded" aria-label="How It Works">How It Works</button></li>
-            <li><button onClick={() => scrollToSection(buyRef)} className="text-white w-full py-2 hover:bg-gray-700 rounded" aria-label="Buy & Refer">Buy & Refer</button></li>
-            <li><button onClick={() => scrollToSection(stakeRef)} className="text-white w-full py-2 hover:bg-gray-700 rounded" aria-label="Stake">Stake</button></li>
-            <li><button onClick={() => scrollToSection(claimRef)} className="text-white w-full py-2 hover:bg-gray-700 rounded" aria-label="Claim Rewards">Claim Rewards</button></li>
-            {isOwner && <li><button onClick={() => scrollToSection(priceUpdateRef)} className="text-white w-full py-2 hover:bg-gray-700 rounded" aria-label="Price Update">Price Update</button></li>}
-            <li><button onClick={() => scrollToSection(rewardCalcRef)} className="text-white w-full py-2 hover:bg-gray-700 rounded" aria-label="Reward Calculator">Reward Calculator</button></li>
-            <li><button onClick={() => scrollToSection(faqRef)} className="text-white w-full py-2 hover:bg-gray-700 rounded" aria-label="FAQ">FAQ</button></li>
-            <li><button onClick={() => scrollToSection(historyRef)} className="text-white w-full py-2 hover:bg-gray-700 rounded" aria-label="Transaction History">Transaction History</button></li>
-            <li><button onClick={() => scrollToSection(metricsRef)} className="text-white w-full py-2 hover:bg-gray-700 rounded" aria-label="Performance Metrics">Performance Metrics</button></li>
-            <li><button onClick={() => scrollToSection(documentsRef)} className="text-white w-full py-2 hover:bg-gray-700 rounded" aria-label="Documents">Documents</button></li>
-            <li><button onClick={toggleTheme} className="text-white w-full py-2 hover:bg-gray-700 rounded" aria-label="Toggle Theme">Toggle Theme</button></li>
+        <nav className={`md:hidden mobile-nav fixed top-[80px] left-0 right-0 ${mobileMenuBg} p-4 z-[60] shadow-lg border-b border-gray-300 dark:border-gray-600 animate-slide-down`}>
+          {/* NEW: Close button */}
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsMobileMenuOpen(false);
+            }} 
+            className="absolute top-2 right-2 ${headerAccountText} hover:opacity-70 transition"
+            aria-label="Close Menu"
+          >
+            <FaTimes size={24} />
+          </button>
+          <ul className="space-y-4 text-center pt-8"> {/* pt-8 for close button space */}
+            <li><button onClick={() => scrollToSection(homeRef)} className={`${mobileMenuText} w-full py-2 ${mobileMenuHover} rounded transition`} aria-label="Home">Home</button></li>
+            <li><button onClick={() => scrollToSection(howItWorksRef)} className={`${mobileMenuText} w-full py-2 ${mobileMenuHover} rounded transition`} aria-label="How It Works">How It Works</button></li>
+            <li><button onClick={() => scrollToSection(buyRef)} className={`${mobileMenuText} w-full py-2 ${mobileMenuHover} rounded transition`} aria-label="Buy & Refer">Buy & Refer</button></li>
+            <li><button onClick={() => scrollToSection(stakeRef)} className={`${mobileMenuText} w-full py-2 ${mobileMenuHover} rounded transition`} aria-label="Stake">Stake</button></li>
+            <li><button onClick={() => scrollToSection(claimRef)} className={`${mobileMenuText} w-full py-2 ${mobileMenuHover} rounded transition`} aria-label="Claim Rewards">Claim Rewards</button></li>
+            {isOwner && <li><button onClick={() => scrollToSection(priceUpdateRef)} className={`${mobileMenuText} w-full py-2 ${mobileMenuHover} rounded transition`} aria-label="Price Update">Price Update</button></li>}
+            <li><button onClick={() => scrollToSection(rewardCalcRef)} className={`${mobileMenuText} w-full py-2 ${mobileMenuHover} rounded transition`} aria-label="Reward Calculator">Reward Calculator</button></li>
+            <li><button onClick={() => scrollToSection(faqRef)} className={`${mobileMenuText} w-full py-2 ${mobileMenuHover} rounded transition`} aria-label="FAQ">FAQ</button></li>
+            <li><button onClick={() => scrollToSection(historyRef)} className={`${mobileMenuText} w-full py-2 ${mobileMenuHover} rounded transition`} aria-label="Transaction History">Transaction History</button></li>
+            <li><button onClick={() => scrollToSection(metricsRef)} className={`${mobileMenuText} w-full py-2 ${mobileMenuHover} rounded transition`} aria-label="Performance Metrics">Performance Metrics</button></li>
+            <li><button onClick={() => scrollToSection(documentsRef)} className={`${mobileMenuText} w-full py-2 ${mobileMenuHover} rounded transition`} aria-label="Documents">Documents</button></li>
+            <li><button onClick={toggleTheme} className={`${mobileMenuText} w-full py-2 ${mobileMenuHover} rounded transition`} aria-label="Toggle Theme">Toggle Theme</button></li>
           </ul>
         </nav>
       )}
 
-      <img src="/banner.png" alt="Blockchain Banner" loading="lazy" className="mt-[96px] md:mt-[104px] w-full h-auto object-cover transition-opacity duration-500 opacity-100" onError={(e) => { e.target.src = '/banner-fallback.png'; console.error('Banner load error'); }} onLoad={(e) => e.target.classList.add('opacity-100')} />
+      {/* UPDATED: Banner mt adjusted for mobile menu space */}
+      <img src="/banner.png" alt="Blockchain Banner" loading="lazy" className="mt-[120px] md:mt-[104px] w-full h-auto object-cover transition-opacity duration-500 opacity-100" onError={(e) => { e.target.src = '/banner-fallback.png'; console.error('Banner load error'); }} onLoad={(e) => e.target.classList.add('opacity-100')} />
 
-      <main className="p-4 md:p-8">
+      <main className="p-4 md:p-8 overflow-x-hidden">
         <section ref={homeRef} className={`text-center mb-12 py-16 rounded-lg ${bgCard} shadow-xl animate-fade-in`}>
-                <h3 className="text-2xl font-semibold mb-4 text-center">Token Contract URL</h3>
-                                                    <p className={`${textSecondary} text-center mb-4`}>https://bscscan.com/token/0x11d2e5fb3eb729fc829baee1d2ada09bfa4ec4d7</p>
-                <ul className="condition-list text-center mx-auto max-w-2xl"></ul>
+          <div className="mb-6">
+            <h3 className="text-2xl font-semibold mb-4 text-center">Token Contract</h3>
+            <button 
+              onClick={() => window.open('https://bscscan.com/token/0x11d2e5fb3eb729fc829baee1d2ada09bfa4ec4d7', '_blank')} 
+              className="bg-gradient-to-r from-ethena-accent to-blue-500 text-white px-6 py-3 rounded-full hover:scale-105 transition font-semibold shadow-md mx-auto block"
+              aria-label="View Token Contract"
+            >
+              Token Contract
+            </button>
+            <p className={`${textSecondary} text-center mt-4 break-all`}>Token Contract Address: 0x11d2e5fb3eb729fc829baee1d2ada09bfa4ec4d7</p>
+          </div>
+          <ul className="condition-list text-center mx-auto max-w-2xl"></ul>
           <h1 className="text-4xl md:text-5xl font-bold mb-4">AtheistWorldToken</h1>
           <p className={`text-lg md:text-2xl ${textSecondary} mb-6`}>Grow your wealth with staking and referrals on the blockchain.</p>
           <button onClick={() => scrollToSection(buyRef)} className="bg-gradient-to-r from-ethena-accent to-blue-500 text-white px-6 py-3 rounded-full hover:scale-105 transition font-semibold shadow-md" aria-label="Start Earning">
@@ -2276,13 +2329,14 @@ function App() {
         )}
       </main>
 
-      <footer className="gradient-accent text-center text-white p-6 shadow-lg">
+      <footer className={`${footerBg} text-center text-white p-6 shadow-lg`}>
         <p className="mb-4">Join our community:</p>
         <div className="flex justify-center gap-8">
           <a href="https://discord.gg/yRmv2UXk" target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition" aria-label="Discord"><FaDiscord size={28} /></a>
           <a href="https://t.me/+uJikM5E5HzkwNTE1" target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition" aria-label="Telegram"><FaTelegramPlane size={28} /></a>
           <a href="https://x.com/teamawt" target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition" aria-label="Twitter"><FaTwitter size={28} /></a>
           <a href="mailto:help@atheistworldtoken.com" className="hover:opacity-70 transition" aria-label="Email"><FaEnvelope size={28} /></a>
+          <a href="https://github.com/atheistworldtoken/atheistworld" target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition" aria-label="GitHub"><FaGithub size={28} /></a>
         </div>
         <button onClick={() => setShowFeedback(true)} className="mt-4 text-sm underline" aria-label="Give Feedback">Give Feedback</button>
         <p className="mt-6 text-sm">© 2025 AtheistWorldToken. All rights reserved.</p>
