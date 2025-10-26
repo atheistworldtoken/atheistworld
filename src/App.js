@@ -63,6 +63,10 @@ function App() {
   const [minStakeAmount, setMinStakeAmount] = useState(0);
   const [maxStakePerUser, setMaxStakePerUser] = useState(0);
 
+  // Added states for missing parameters
+  const [feePct, setFeePct] = useState(0);
+  const [referrerRate, setReferrerRate] = useState(0);
+
   // New states for owner inputs to change parameters
   const [newWelcomeBonus, setNewWelcomeBonus] = useState(0);
   const [newMinBonusBalance, setNewMinBonusBalance] = useState(0);
@@ -76,6 +80,10 @@ function App() {
   const [newMaxBuyPerWallet, setNewMaxBuyPerWallet] = useState(0);
   const [newMinStakeAmount, setNewMinStakeAmount] = useState(0);
   const [newMaxStakePerUser, setNewMaxStakePerUser] = useState(0);
+
+  // Added owner inputs for missing parameters
+  const [newFeePct, setNewFeePct] = useState(0);
+  const [newReferrerRate, setNewReferrerRate] = useState(0);
 
   // Reward calculator states
   const [calcStakeAmount, setCalcStakeAmount] = useState('');
@@ -452,7 +460,11 @@ function App() {
     setNewMaxBuyPerWallet(maxBuyPerWallet);
     setNewMinStakeAmount(minStakeAmount);
     setNewMaxStakePerUser(maxStakePerUser);
-  }, [welcomeBonus, minBonusBalance, maxBonusBalance, refereeDiscountRate, stakeAPR, maxRefs, maxRewardPerRef, minStakeTime, minBuyAmount, maxBuyPerWallet, minStakeAmount, maxStakePerUser]);
+
+    // Sync new missing parameters
+    setNewFeePct(feePct * 10000);
+    setNewReferrerRate(referrerRate * 10000);
+  }, [welcomeBonus, minBonusBalance, maxBonusBalance, refereeDiscountRate, stakeAPR, maxRefs, maxRewardPerRef, minStakeTime, minBuyAmount, maxBuyPerWallet, minStakeAmount, maxStakePerUser, feePct, referrerRate]);
 
   // Reward calculator effect
   useEffect(() => {
@@ -637,6 +649,20 @@ function App() {
         await updateContractData(cont);
       });
 
+      // Added events for missing parameters
+      wsContract.on('FeePctUpdated', async (oldPct, newPct) => {
+        const pctPercent = (Number(newPct) / 10000 * 100).toFixed(0);
+        setFeePct(Number(newPct) / 10000);
+        setNotification(`Fee percentage updated to ${pctPercent}%!`);
+        await updateContractData(cont);
+      });
+      wsContract.on('ReferrerRateUpdated', async (oldRate, newRate) => {
+        const ratePercent = (Number(newRate) / 10000 * 100).toFixed(0);
+        setReferrerRate(Number(newRate) / 10000);
+        setNotification(`Referrer rate updated to ${ratePercent}%!`);
+        await updateContractData(cont);
+      });
+
       setNotification('Wallet connected successfully!');
     } catch (error) {
       console.error(error);
@@ -754,6 +780,13 @@ function App() {
 
       const maxStakePu = await cont.maxStakeAmt();
       setMaxStakePerUser(ethers.formatEther(maxStakePu));
+
+      // Added fetches for missing parameters
+      const fee = await cont.feePct();
+      setFeePct(Number(fee) / 10000);
+
+      const refRate = await cont.referrerRate();
+      setReferrerRate(Number(refRate) / 10000);
 
       // Fetch performance metrics (assuming getters exist in contract)
       try {
@@ -1172,6 +1205,31 @@ function App() {
     }
   };
 
+  // Added functions for missing parameters
+  const setNewFeePctFn = async () => {
+    if (!contract || !isOwner) return;
+    try {
+      const tx = await contract.setFeePct(newFeePct);
+      await tx.wait();
+      setNotification('Fee percentage updated!');
+      await updateContractData(contract);
+    } catch (error) {
+      setErrorMsg('Update failed: ' + (error.reason || error.shortMessage || error.message));
+    }
+  };
+
+  const setNewReferrerRateFn = async () => {
+    if (!contract || !isOwner) return;
+    try {
+      const tx = await contract.setReferrerRate(newReferrerRate);
+      await tx.wait();
+      setNotification('Referrer rate updated!');
+      await updateContractData(contract);
+    } catch (error) {
+      setErrorMsg('Update failed: ' + (error.reason || error.shortMessage || error.message));
+    }
+  };
+
   const shareReferral = () => {
     if (!referralLink) {
       setErrorMsg('Connect wallet to generate referral link!');
@@ -1424,7 +1482,7 @@ function App() {
                 <div className={`p-4 ${bgSubCard} rounded-lg shadow-md transition-transform duration-300 hover:scale-105`}>
                   <h3 className="text-xl font-semibold mb-2">Buy AWT</h3>
                   <p className={textSecondary}>
-                    Purchase AWT tokens with BNB. Use a referral link for a {(refereeDiscountRate * 100).toFixed(0)}% discount!
+                    Purchase AWT tokens with BNB. Use a referral link for a {(refereeDiscountRate * 100).toFixed(0)}% discount! Fee: {(feePct * 100).toFixed(0)}%.
                   </p>
                   <ul className="condition-list">
                     <li>Referral program active (current: {isReferralActive ? 'Yes' : 'No'})</li>
@@ -1448,7 +1506,7 @@ function App() {
                 <div className={`p-4 ${bgSubCard} rounded-lg shadow-md transition-transform duration-300 hover:scale-105`}>
                   <h3 className="text-xl font-semibold mb-2">Refer Friends</h3>
                   <p className={textSecondary}>
-                    Share your referral link to earn up to {parseFloat(maxRewardPerRef).toFixed(0)} AWT per friend, max {maxRefs} referrals.
+                    Share your referral link to earn up to {parseFloat(maxRewardPerRef).toFixed(0)} AWT per friend at {(referrerRate * 100).toFixed(0)}% rate, max {maxRefs} referrals.
                   </p>
                   <ul className="condition-list">
                     <li>Referral program active (current: {isReferralActive ? 'Yes' : 'No'})</li>
@@ -1467,6 +1525,7 @@ function App() {
                   <li>Adjust max refs, max reward per ref</li>
                   <li>Change min stake time, min/max buy/stake amounts</li>
                   <li>Update exchange rate from oracle/DEX, set pair address, AWT USD price</li>
+                  <li>Set fee percentage and referrer rate</li>
                 </ul>
               </div>
             </>
@@ -1546,12 +1605,12 @@ function App() {
                   <h3 className="text-xl font-semibold mb-4 flex items-center">
                     Buy AWT Tokens
                     <div className="tooltip ml-2">
-                      <FaInfoCircle className="text-info-blue cursor-pointer" onClick={() => openModal('Buy AWT with BNB. Use a referral address for up to ' + (refereeDiscountRate * 100).toFixed(0) + '% discount. Basis points refer to 1/100th of a percentage.')} />
-                      <span className="tooltiptext">Buy AWT with BNB. Use a referral address for up to {(refereeDiscountRate * 100).toFixed(0)}% discount. Basis points: 1 basis point = 0.01%.</span>
+                      <FaInfoCircle className="text-info-blue cursor-pointer" onClick={() => openModal('Buy AWT with BNB. Use a referral address for up to ' + (refereeDiscountRate * 100).toFixed(0) + '% discount. Basis points refer to 1/100th of a percentage. Fee: ' + (feePct * 100).toFixed(0) + '%.')} />
+                      <span className="tooltiptext">Buy AWT with BNB. Use a referral address for up to {(refereeDiscountRate * 100).toFixed(0)}% discount. Basis points: 1 basis point = 0.01%. Fee: {(feePct * 100).toFixed(0)}%.</span>
                     </div>
                   </h3>
                   <p className={`${textTertiary} text-sm mb-4`}>
-                    Rate: 1 AWT = {parseFloat(exchangeRate).toFixed(6)} BNB, min {minBuyAmount}, max {maxBuyPerWallet} per wallet.
+                    Rate: 1 AWT = {parseFloat(exchangeRate).toFixed(6)} BNB, min {minBuyAmount}, max {maxBuyPerWallet} per wallet. Fee: {(feePct * 100).toFixed(0)}%.
                     <br />Discount: {(refereeDiscountRate * 100).toFixed(0)}% with valid referral (if active: {isReferralActive ? 'Yes' : 'No'}).
                   </p>
                   <ul className="condition-list mb-4">
@@ -1598,12 +1657,12 @@ function App() {
                   <h3 className="text-xl font-semibold mb-4 flex items-center">
                     Refer & Earn
                     <div className="tooltip ml-2">
-                      <FaInfoCircle className="text-info-blue cursor-pointer" onClick={() => openModal('Share your referral link to earn up to ' + maxRewardPerRef + ' AWT per friend (max ' + maxRefs + ' refs). Lock period is the minimum time your stake must remain locked.')} />
-                      <span className="tooltiptext">Share your referral link to earn up to {maxRewardPerRef} AWT per friend (max {maxRefs} refs). Lock period: Minimum staking duration before unstaking.</span>
+                      <FaInfoCircle className="text-info-blue cursor-pointer" onClick={() => openModal('Share your referral link to earn up to ' + maxRewardPerRef + ' AWT per friend (max ' + maxRefs + ' refs) at ' + (referrerRate * 100).toFixed(0) + '% rate. Lock period is the minimum time your stake must remain locked.')} />
+                      <span className="tooltiptext">Share your referral link to earn up to {maxRewardPerRef} AWT per friend (max {maxRefs} refs) at {(referrerRate * 100).toFixed(0)}% rate. Lock period: Minimum staking duration before unstaking.</span>
                     </div>
                   </h3>
                   <p className={`${textTertiary} text-sm mb-4`}>
-                    Earn up to {parseFloat(maxRewardPerRef).toFixed(0)} AWT per friend, max {maxRefs} referrals.
+                    Earn up to {parseFloat(maxRewardPerRef).toFixed(0)} AWT per friend at {(referrerRate * 100).toFixed(0)}% rate, max {maxRefs} referrals.
                     <br />Your link: <span className="break-all">{referralLink || 'Connect wallet'}</span>
                   </p>
                   <ul className="condition-list mb-4">
@@ -1895,6 +1954,17 @@ function App() {
                     <td className="border px-4 py-2">{maxStakePerUser > 0 ? maxStakePerUser : 'Unlimited'} AWT</td>
                     <td className="border px-4 py-2">Maximum total stake per user.</td>
                   </tr>
+                  {/* Added rows for missing parameters */}
+                  <tr>
+                    <td className="border px-4 py-2">Fee Percentage</td>
+                    <td className="border px-4 py-2">{(feePct * 100).toFixed(0)}%</td>
+                    <td className="border px-4 py-2">Transaction fee rate applied to buys or other operations.</td>
+                  </tr>
+                  <tr>
+                    <td className="border px-4 py-2">Referrer Rate</td>
+                    <td className="border px-4 py-2">{(referrerRate * 100).toFixed(0)}%</td>
+                    <td className="border px-4 py-2">Reward rate percentage for successful referrals.</td>
+                  </tr>
                 </tbody>
               </table>
               {/* Mobile Cards */}
@@ -1958,6 +2028,17 @@ function App() {
                   <h3 className="font-semibold">Max Stake Per User</h3>
                   <p>{maxStakePerUser > 0 ? maxStakePerUser : 'Unlimited'} AWT</p>
                   <p className="text-sm">Maximum total stake per user.</p>
+                </div>
+                {/* Added mobile cards for missing parameters */}
+                <div className={`${bgSubCard} p-4 rounded-lg`}>
+                  <h3 className="font-semibold">Fee Percentage</h3>
+                  <p>{(feePct * 100).toFixed(0)}%</p>
+                  <p className="text-sm">Transaction fee rate applied to buys or other operations.</p>
+                </div>
+                <div className={`${bgSubCard} p-4 rounded-lg`}>
+                  <h3 className="font-semibold">Referrer Rate</h3>
+                  <p>{(referrerRate * 100).toFixed(0)}%</p>
+                  <p className="text-sm">Reward rate percentage for successful referrals.</p>
                 </div>
               </div>
             </>
@@ -2195,6 +2276,35 @@ function App() {
                       Set Max Stake Per User
                     </button>
                   </div>
+                  {/* Added owner controls for missing parameters */}
+                  <div>
+                    <h3 className="text-xl font-semibold mb-4">Set Fee Percentage (basis points)</h3>
+                    <input
+                      type="number"
+                      value={newFeePct}
+                      onChange={(e) => setNewFeePct(Math.max(0, e.target.value))}
+                      className={`w-full ${bgInput} ${textInput} border ${borderInput} rounded p-2 mb-4 focus:ring-2 focus:ring-ethena-accent`}
+                      placeholder="Enter new fee pct (e.g., 100 for 1%)"
+                      step="100"
+                    />
+                    <button onClick={setNewFeePctFn} className="w-full bg-info-blue text-white px-4 py-2 rounded hover:scale-105 transition shadow-md">
+                      Set Fee Percentage
+                    </button>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold mb-4">Set Referrer Rate (basis points)</h3>
+                    <input
+                      type="number"
+                      value={newReferrerRate}
+                      onChange={(e) => setNewReferrerRate(Math.max(0, e.target.value))}
+                      className={`w-full ${bgInput} ${textInput} border ${borderInput} rounded p-2 mb-4 focus:ring-2 focus:ring-ethena-accent`}
+                      placeholder="Enter new referrer rate (e.g., 1000 for 10%)"
+                      step="100"
+                    />
+                    <button onClick={setNewReferrerRateFn} className="w-full bg-info-blue text-white px-4 py-2 rounded hover:scale-105 transition shadow-md">
+                      Set Referrer Rate
+                    </button>
+                  </div>
                 </div>
                 {errorMsg && <p className="text-error-red mt-4 text-center">{errorMsg}</p>}
               </>
@@ -2232,7 +2342,7 @@ function App() {
             <div>
               <h3 className="text-xl font-semibold mb-2">How does the referral system work?</h3>
               <p className={textSecondary}>
-                Share your unique referral link. When someone buys AWT using it, you earn rewards up to {maxRewardPerRef} AWT per referral, max {maxRefs} referrals. Use: In refer section. Conditions: Program active, max not reached, valid buy.
+                Share your unique referral link. When someone buys AWT using it, you earn rewards up to {maxRewardPerRef} AWT per referral, max {maxRefs} referrals at {(referrerRate * 100).toFixed(0)}% rate. Use: In refer section. Conditions: Program active, max not reached, valid buy.
               </p>
             </div>
             <div>
