@@ -490,6 +490,35 @@ function App() {
     }
     try {
       await provider.send('eth_requestAccounts', []);
+      let network = await provider.getNetwork();
+      if (Number(network.chainId) !== 56) {
+        try {
+          await window.ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: '0x38' }],
+          });
+        } catch (switchError) {
+          if (switchError.code === 4902) {
+            await window.ethereum.request({
+              method: 'wallet_addEthereumChain',
+              params: [{
+                chainId: '0x38',
+                chainName: 'Binance Smart Chain',
+                nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
+                rpcUrls: ['https://bsc-dataseed.binance.org/'],
+                blockExplorerUrls: ['https://bscscan.com'],
+              }],
+            });
+          } else {
+            throw switchError;
+          }
+        }
+        network = await provider.getNetwork();
+        if (Number(network.chainId) !== 56) {
+          setErrorMsg('Failed to switch to BSC Mainnet.');
+          return;
+        }
+      }
       const sign = await provider.getSigner();
       setSigner(sign);
       const addr = await sign.getAddress();
@@ -1442,6 +1471,7 @@ function App() {
               </div>
             </>
           )}
+          {errorMsg && <p className="text-error-red mt-4 text-center">{errorMsg}</p>}
         </section>
 
         <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-12">
@@ -1470,6 +1500,7 @@ function App() {
               </div>
             </>
           )}
+          {errorMsg && <p className="text-error-red mt-4 text-center col-span-4">{errorMsg}</p>}
         </section>
 
         {account && (
@@ -1500,6 +1531,7 @@ function App() {
                 </div>
               </>
             )}
+            {errorMsg && <p className="text-error-red mt-4 text-center col-span-5">{errorMsg}</p>}
           </section>
         )}
 
@@ -1531,7 +1563,7 @@ function App() {
                   <input
                     type="number"
                     value={awtAmount}
-                    onChange={(e) => setAwtAmount(e.target.value)}
+                    onChange={(e) => setAwtAmount(Math.max(0, e.target.value))}
                     className={`w-full ${bgInput} ${textInput} border ${borderInput} rounded p-2 mb-4 focus:ring-2 focus:ring-ethena-accent`}
                     placeholder="Enter AWT amount"
                     min={minBuyAmount}
@@ -1620,7 +1652,7 @@ function App() {
               <input
                 type="number"
                 value={stakeAmount}
-                onChange={(e) => setStakeAmount(e.target.value)}
+                onChange={(e) => setStakeAmount(Math.max(0, e.target.value))}
                 className={`w-full ${bgInput} ${textInput} border ${borderInput} rounded p-2 mb-4 focus:ring-2 focus:ring-ethena-accent`}
                 placeholder="Enter AWT amount"
                 min={minStakeAmount}
@@ -1665,7 +1697,7 @@ function App() {
               <input
                 type="number"
                 value={unstakeAmount}
-                onChange={(e) => setUnstakeAmount(e.target.value)}
+                onChange={(e) => setUnstakeAmount(Math.max(0, e.target.value))}
                 className={`w-full ${bgInput} ${textInput} border ${borderInput} rounded p-2 mb-4 focus:ring-2 focus:ring-ethena-accent`}
                 placeholder="Enter AWT amount"
                 min="0.1"
@@ -1754,7 +1786,7 @@ function App() {
                   <input
                     type="number"
                     value={calcStakeAmount}
-                    onChange={(e) => setCalcStakeAmount(e.target.value)}
+                    onChange={(e) => setCalcStakeAmount(Math.max(0, e.target.value))}
                     className={`w-full ${bgInput} ${textInput} border ${borderInput} rounded p-2 focus:ring-2 focus:ring-ethena-accent`}
                     placeholder="Enter stake amount"
                     min={minStakeAmount}
@@ -1766,7 +1798,7 @@ function App() {
                   <input
                     type="number"
                     value={calcDurationMonths}
-                    onChange={(e) => setCalcDurationMonths(e.target.value)}
+                    onChange={(e) => setCalcDurationMonths(Math.max(1, e.target.value))}
                     className={`w-full ${bgInput} ${textInput} border ${borderInput} rounded p-2 focus:ring-2 focus:ring-ethena-accent`}
                     placeholder="Enter months"
                     min="1"
@@ -1784,6 +1816,7 @@ function App() {
               <p className={`${textTertiary} text-sm text-center`}>Calculation based on current APR: {(stakeAPR * 100).toFixed(0)}%. Actual rewards may vary if parameters change.</p>
             </>
           )}
+          {errorMsg && <p className="text-error-red mt-4 text-center">{errorMsg}</p>}
         </section>
 
         <section ref={paramsRef} className={`params-section ${bgCard} p-6 rounded-lg mb-12 animate-fade-in shadow-xl`}>
@@ -1929,6 +1962,7 @@ function App() {
               </div>
             </>
           )}
+          {errorMsg && <p className="text-error-red mt-4 text-center">{errorMsg}</p>}
         </section>
 
         {isOwner && (
@@ -1984,7 +2018,7 @@ function App() {
                     <input
                       type="number"
                       value={awtUsdPrice}
-                      onChange={(e) => setAwtUsdPrice(e.target.value)}
+                      onChange={(e) => setAwtUsdPrice(Math.max(0, e.target.value))}
                       className={`w-full ${bgInput} ${textInput} border ${borderInput} rounded p-2 mb-4 focus:ring-2 focus:ring-ethena-accent`}
                       placeholder="Enter AWT USD Price"
                       step="0.001"
@@ -1998,7 +2032,7 @@ function App() {
                     <input
                       type="number"
                       value={newWelcomeBonus}
-                      onChange={(e) => setNewWelcomeBonus(e.target.value)}
+                      onChange={(e) => setNewWelcomeBonus(Math.max(0, e.target.value))}
                       className={`w-full ${bgInput} ${textInput} border ${borderInput} rounded p-2 mb-4 focus:ring-2 focus:ring-ethena-accent`}
                       placeholder="Enter new welcome bonus"
                       step="1"
@@ -2012,7 +2046,7 @@ function App() {
                     <input
                       type="number"
                       value={newMinBonusBalance}
-                      onChange={(e) => setNewMinBonusBalance(e.target.value)}
+                      onChange={(e) => setNewMinBonusBalance(Math.max(0, e.target.value))}
                       className={`w-full ${bgInput} ${textInput} border ${borderInput} rounded p-2 mb-4 focus:ring-2 focus:ring-ethena-accent`}
                       placeholder="Enter new min bonus balance"
                       step="1"
@@ -2026,7 +2060,7 @@ function App() {
                     <input
                       type="number"
                       value={newMaxBonusBalance}
-                      onChange={(e) => setNewMaxBonusBalance(e.target.value)}
+                      onChange={(e) => setNewMaxBonusBalance(Math.max(0, e.target.value))}
                       className={`w-full ${bgInput} ${textInput} border ${borderInput} rounded p-2 mb-4 focus:ring-2 focus:ring-ethena-accent`}
                       placeholder="Enter new max bonus balance"
                       step="1"
@@ -2040,7 +2074,7 @@ function App() {
                     <input
                       type="number"
                       value={newRefereeDiscountRate}
-                      onChange={(e) => setNewRefereeDiscountRate(e.target.value)}
+                      onChange={(e) => setNewRefereeDiscountRate(Math.max(0, e.target.value))}
                       className={`w-full ${bgInput} ${textInput} border ${borderInput} rounded p-2 mb-4 focus:ring-2 focus:ring-ethena-accent`}
                       placeholder="Enter new discount rate (e.g., 2000 for 20%)"
                       step="100"
@@ -2054,7 +2088,7 @@ function App() {
                     <input
                       type="number"
                       value={newStakeAPR}
-                      onChange={(e) => setNewStakeAPR(e.target.value)}
+                      onChange={(e) => setNewStakeAPR(Math.max(0, e.target.value))}
                       className={`w-full ${bgInput} ${textInput} border ${borderInput} rounded p-2 mb-4 focus:ring-2 focus:ring-ethena-accent`}
                       placeholder="Enter new APR (e.g., 2000 for 20%)"
                       step="100"
@@ -2068,7 +2102,7 @@ function App() {
                     <input
                       type="number"
                       value={newMaxRefs}
-                      onChange={(e) => setNewMaxRefs(e.target.value)}
+                      onChange={(e) => setNewMaxRefs(Math.max(0, e.target.value))}
                       className={`w-full ${bgInput} ${textInput} border ${borderInput} rounded p-2 mb-4 focus:ring-2 focus:ring-ethena-accent`}
                       placeholder="Enter new max referrals"
                       step="1"
@@ -2082,7 +2116,7 @@ function App() {
                     <input
                       type="number"
                       value={newMaxRewardPerRef}
-                      onChange={(e) => setNewMaxRewardPerRef(e.target.value)}
+                      onChange={(e) => setNewMaxRewardPerRef(Math.max(0, e.target.value))}
                       className={`w-full ${bgInput} ${textInput} border ${borderInput} rounded p-2 mb-4 focus:ring-2 focus:ring-ethena-accent`}
                       placeholder="Enter new max reward per ref"
                       step="1"
@@ -2096,7 +2130,7 @@ function App() {
                     <input
                       type="number"
                       value={newMinStakeTime}
-                      onChange={(e) => setNewMinStakeTime(e.target.value)}
+                      onChange={(e) => setNewMinStakeTime(Math.max(0, e.target.value))}
                       className={`w-full ${bgInput} ${textInput} border ${borderInput} rounded p-2 mb-4 focus:ring-2 focus:ring-ethena-accent`}
                       placeholder="Enter new min stake time (e.g., 86400 for 1 day)"
                       step="86400"
@@ -2110,7 +2144,7 @@ function App() {
                     <input
                       type="number"
                       value={newMinBuyAmount}
-                      onChange={(e) => setNewMinBuyAmount(e.target.value)}
+                      onChange={(e) => setNewMinBuyAmount(Math.max(0, e.target.value))}
                       className={`w-full ${bgInput} ${textInput} border ${borderInput} rounded p-2 mb-4 focus:ring-2 focus:ring-ethena-accent`}
                       placeholder="Enter new min buy amount"
                       step="0.1"
@@ -2124,7 +2158,7 @@ function App() {
                     <input
                       type="number"
                       value={newMaxBuyPerWallet}
-                      onChange={(e) => setNewMaxBuyPerWallet(e.target.value)}
+                      onChange={(e) => setNewMaxBuyPerWallet(Math.max(0, e.target.value))}
                       className={`w-full ${bgInput} ${textInput} border ${borderInput} rounded p-2 mb-4 focus:ring-2 focus:ring-ethena-accent`}
                       placeholder="Enter new max buy per wallet"
                       step="100"
@@ -2138,7 +2172,7 @@ function App() {
                     <input
                       type="number"
                       value={newMinStakeAmount}
-                      onChange={(e) => setNewMinStakeAmount(e.target.value)}
+                      onChange={(e) => setNewMinStakeAmount(Math.max(0, e.target.value))}
                       className={`w-full ${bgInput} ${textInput} border ${borderInput} rounded p-2 mb-4 focus:ring-2 focus:ring-ethena-accent`}
                       placeholder="Enter new min stake amount"
                       step="1"
@@ -2152,7 +2186,7 @@ function App() {
                     <input
                       type="number"
                       value={newMaxStakePerUser}
-                      onChange={(e) => setNewMaxStakePerUser(e.target.value)}
+                      onChange={(e) => setNewMaxStakePerUser(Math.max(0, e.target.value))}
                       className={`w-full ${bgInput} ${textInput} border ${borderInput} rounded p-2 mb-4 focus:ring-2 focus:ring-ethena-accent`}
                       placeholder="Enter new max stake per user"
                       step="100"
@@ -2231,6 +2265,7 @@ function App() {
                 {transactionHistory.length === 0 && <p className="text-center">No history found in recent blocks.</p>}
               </ul>
             )}
+            {errorMsg && <p className="text-error-red mt-4 text-center">{errorMsg}</p>}
           </section>
         )}
 
@@ -2249,6 +2284,7 @@ function App() {
           <div className="h-64 md:h-80">
             <canvas ref={metricsChartRef}></canvas>
           </div>
+          {errorMsg && <p className="text-error-red mt-4 text-center">{errorMsg}</p>}
         </section>
 
         <section ref={documentsRef} className={`documents-section ${bgCard} p-6 rounded-lg mb-12 animate-fade-in shadow-xl`}>
