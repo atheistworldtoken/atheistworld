@@ -446,7 +446,29 @@ function App() {
     }
   }, [totalStaked, totalReferrals, theme]);
 
-  // Sync owner input states with current values
+// Timer states - केवल यह ऐड करें
+const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+const listingDate = new Date('2026-10-20T12:00:00Z').getTime(); // Listing date: Tue, 20 Oct 2026, 12:00 UTC (समय बदल सकते हैं)
+// Timer useEffect - केवल यह ऐड करें
+useEffect(() => {
+  const timer = setInterval(() => {
+    const now = new Date().getTime();
+    const distance = listingDate - now;
+
+    if (distance > 0) {
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+      setTimeLeft({ days, hours, minutes, seconds });
+    } else {
+      setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+    }
+  }, 1000); // हर सेकंड अपडेट
+
+  return () => clearInterval(timer); // Cleanup
+}, [listingDate]); 
+// Sync owner input states with current values
   useEffect(() => {
     setNewWelcomeBonus(welcomeBonus);
     setNewMinBonusBalance(minBonusBalance);
@@ -1420,6 +1442,46 @@ function App() {
 
       {/* UPDATED: Banner mt adjusted for mobile menu space */}
       <img src="/banner.png" alt="Blockchain Banner" loading="lazy" className="mt-[120px] md:mt-[104px] w-full h-auto object-cover transition-opacity duration-500 opacity-100" onError={(e) => { e.target.src = '/banner-fallback.png'; console.error('Banner load error'); }} onLoad={(e) => e.target.classList.add('opacity-100')} />
+
+{/* Countdown Timer Banner - Banner के नीचे ऐड करें */}
+<section className={`text-center py-8 px-4 ${bgCard} shadow-lg animate-fade-in`}>
+  <h2 className={`text-2xl md:text-3xl font-bold mb-4 ${textPrimary}`}>
+    🚀 AWT Token Listing on PancakeSwap Incoming!
+  </h2>
+  <p className={`${textSecondary} mb-6 text-lg`}>
+    Get ready! Listing on <a href="https://pancakeswap.finance/home" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-400">PancakeSwap</a> in:
+  </p>
+  {timeLeft.days > 0 || timeLeft.hours > 0 || timeLeft.minutes > 0 || timeLeft.seconds > 0 ? (
+    <div className="grid grid-cols-4 gap-4 max-w-2xl mx-auto">
+      <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-4">
+        <div className="text-3xl md:text-4xl font-bold">{timeLeft.days}</div>
+        <div className={`${textTertiary} text-sm`}>Days</div>
+      </div>
+      <div className="bg-gradient-to-r from-green-500 to-blue-600 rounded-lg p-4">
+        <div className="text-3xl md:text-4xl font-bold">{timeLeft.hours}</div>
+        <div className={`${textTertiary} text-sm`}>Hours</div>
+      </div>
+      <div className="bg-gradient-to-r from-yellow-500 to-orange-600 rounded-lg p-4">
+        <div className="text-3xl md:text-4xl font-bold">{timeLeft.minutes}</div>
+        <div className={`${textTertiary} text-sm`}>Minutes</div>
+      </div>
+      <div className="bg-gradient-to-r from-red-500 to-pink-600 rounded-lg p-4">
+        <div className="text-3xl md:text-4xl font-bold">{timeLeft.seconds}</div>
+        <div className={`${textTertiary} text-sm`}>Seconds</div>
+      </div>
+    </div>
+  ) : (
+    <div className="text-3xl font-bold text-green-500 animate-pulse">
+      🎉 Listing Live Now! Trade AWT on PancakeSwap!
+    </div>
+  )}
+  <button 
+    onClick={() => window.open('https://pancakeswap.finance/home', '_blank')} 
+    className="mt-6 bg-gradient-to-r from-green-500 to-blue-600 text-white px-6 py-3 rounded-full hover:scale-105 transition font-semibold shadow-md"
+  >
+    Visit PancakeSwap
+  </button>
+</section>
 
       <main className="p-4 md:p-8 overflow-x-hidden">
         <section ref={homeRef} className={`text-center mb-12 py-16 rounded-lg ${bgCard} shadow-xl animate-fade-in`}>
