@@ -1446,6 +1446,7 @@ useEffect(() => {
 {/* Countdown Timer Banner - Banner के नीचे ऐड करें */}
 <section className={`text-center py-8 px-4 ${bgCard} shadow-lg animate-fade-in`}>
   <h2 className={`text-2xl md:text-3xl font-bold mb-4 ${textPrimary}`}>
+    help@atheistworldtoken.com
     🚀 AWT Token Listing on PancakeSwap Incoming!
   </h2>
   <p className={`${textSecondary} mb-6 text-lg`}>
