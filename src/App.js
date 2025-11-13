@@ -1446,7 +1446,6 @@ useEffect(() => {
 {/* Countdown Timer Banner - Banner के नीचे ऐड करें */}
 <section className={`text-center py-8 px-4 ${bgCard} shadow-lg animate-fade-in`}>
   <h2 className={`text-2xl md:text-3xl font-bold mb-4 ${textPrimary}`}>
-    help@atheistworldtoken.com
     🚀 AWT Token Listing on PancakeSwap Incoming!
   </h2>
   <p className={`${textSecondary} mb-6 text-lg`}>
@@ -1499,6 +1498,7 @@ useEffect(() => {
           </div>
           <ul className="condition-list text-center mx-auto max-w-2xl"></ul>
           <h1 className="text-4xl md:text-5xl font-bold mb-4">AtheistWorldToken</h1>
+          <p className={`text-lg md:text-2xl ${textSecondary} mb-6`}>help@atheistworldtoken.com.</p>
           <p className={`text-lg md:text-2xl ${textSecondary} mb-6`}>Grow your wealth with staking and referrals on the blockchain.</p>
           <button onClick={() => scrollToSection(buyRef)} className="bg-gradient-to-r from-ethena-accent to-blue-500 text-white px-6 py-3 rounded-full hover:scale-105 transition font-semibold shadow-md" aria-label="Start Earning">
             Start Earning with AWT
