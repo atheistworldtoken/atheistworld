@@ -245,6 +245,16 @@ function App() {
     return () => clearInterval(interval);
   }, [autoClaim, pendingRewards, contract]);
 
+  // UPDATED: Removed the async fetchExpectedDiscount useEffect and replaced with synchronous local calculation
+  // This ensures immediate updates when refereeDiscountRate changes (e.g., after owner updates parameter)
+  const calculatedExpectedDiscount = React.useMemo(() => {
+    const awtNum = parseFloat(awtAmount) || 0;
+    if (awtNum > 0 && referrer && isReferralActive && refereeDiscountRate > 0) {
+      return (awtNum * refereeDiscountRate).toFixed(6);
+    }
+    return '0';
+  }, [awtAmount, referrer, isReferralActive, refereeDiscountRate]);
+
   useEffect(() => {
     const estimateGasForBuy = async () => {
       if (contract && awtAmount > 0) {
@@ -315,23 +325,6 @@ function App() {
     };
     estimateGasForClaim();
   }, [pendingRewards, contract]);
-
-  useEffect(() => {
-    const fetchExpectedDiscount = async () => {
-      if (contract && awtAmount > 0 && referrer && isReferralActive) {
-        try {
-          const awtWei = ethers.parseUnits(awtAmount, 18);
-          const [discount] = await contract.getRefereeDiscount(awtWei);
-          setExpectedDiscount(ethers.formatEther(discount));
-        } catch (error) {
-          setExpectedDiscount(0);
-        }
-      } else {
-        setExpectedDiscount(0);
-      }
-    };
-    fetchExpectedDiscount();
-  }, [awtAmount, referrer, contract, isReferralActive]);
 
   useEffect(() => {
     if (rewardChartRef.current && userStaked > 0 && stakeAPR > 0) {
@@ -1704,7 +1697,8 @@ useEffect(() => {
                   />
                   {!isValidReferrer && referrer && <p className="text-error-red text-sm mb-2">Invalid referrer address</p>}
                   <p className={`${textSecondary} text-sm mb-2`}>Required BNB: {calculateBnbRequired()} BNB</p>
-                  <p className={`${textSecondary} text-sm mb-2`}>Expected AWT: {(parseFloat(awtAmount || 0) + parseFloat(expectedDiscount || 0)).toFixed(2)}</p>
+                  {/* UPDATED: Use calculatedExpectedDiscount for immediate real-time updates */}
+                  <p className={`${textSecondary} text-sm mb-2`}>Expected AWT: {(parseFloat(awtAmount || 0) + parseFloat(calculatedExpectedDiscount)).toFixed(2)} (Extra: +{calculatedExpectedDiscount} from referral discount)</p>
                   <p className={`${textSecondary} text-sm mb-4`}>Estimated Gas: {gasEstimateBuy}</p>
                   <button
                     onClick={buyAWT}
