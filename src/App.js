@@ -1439,7 +1439,7 @@ useEffect(() => {
 {/* Countdown Timer Banner - Banner के नीचे ऐड करें */}
 <section className={`text-center py-8 px-4 ${bgCard} shadow-lg animate-fade-in`}>
   <h2 className={`text-2xl md:text-3xl font-bold mb-4 ${textPrimary}`}>
-    🚀 AWT Token Listing on PancakeSwap Incoming!
+    🚀 AWT Token is LIVE on PancakeSwap! 🎉
   </h2>
   <p className={`${textSecondary} mb-6 text-lg`}>
     Get ready! Listing on <a href="https://pancakeswap.finance/swap?inputCurrency=0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c&outputCurrency=0x11d2e5FB3EB729fc829baee1d2ADa09bFa4EC4D7" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-400">PancakeSwap</a> in:
@@ -1465,7 +1465,7 @@ useEffect(() => {
     </div>
   ) : (
     <div className="text-3xl font-bold text-green-500 animate-pulse">
-      🎉 Listing Live Now! Trade AWT on PancakeSwap!
+      🎉 Dive in, Trade Now, and Join the Atheist Revolution – Your Wallet's New Favorite Asset Awaits! 🎉
     </div>
   )}
   <button 
