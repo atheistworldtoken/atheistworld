@@ -441,7 +441,7 @@ function App() {
 
 // Timer states - केवल यह ऐड करें
 const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-const listingDate = new Date('2026-10-20T12:00:00Z').getTime(); // Listing date: Tue, 20 Oct 2026, 12:00 UTC (समय बदल सकते हैं)
+const listingDate = new Date('2025-11-20T12:00:00Z').getTime(); // Listing date: Tue, 20 Oct 2026, 12:00 UTC (समय बदल सकते हैं)
 // Timer useEffect - केवल यह ऐड करें
 useEffect(() => {
   const timer = setInterval(() => {
