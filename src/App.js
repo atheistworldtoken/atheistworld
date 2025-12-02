@@ -1442,7 +1442,7 @@ useEffect(() => {
     🚀 AWT Token Listing on PancakeSwap Incoming!
   </h2>
   <p className={`${textSecondary} mb-6 text-lg`}>
-    Get ready! Listing on <a href="https://pancakeswap.finance/home" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-400">PancakeSwap</a> in:
+    Get ready! Listing on <a href="https://pancakeswap.finance/swap?inputCurrency=0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c&outputCurrency=0x11d2e5FB3EB729fc829baee1d2ADa09bFa4EC4D7" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-400">PancakeSwap</a> in:
   </p>
   {timeLeft.days > 0 || timeLeft.hours > 0 || timeLeft.minutes > 0 || timeLeft.seconds > 0 ? (
     <div className="grid grid-cols-4 gap-4 max-w-2xl mx-auto">
@@ -1469,7 +1469,7 @@ useEffect(() => {
     </div>
   )}
   <button 
-    onClick={() => window.open('https://pancakeswap.finance/home', '_blank')} 
+    onClick={() => window.open('https://pancakeswap.finance/swap?inputCurrency=0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c&outputCurrency=0x11d2e5FB3EB729fc829baee1d2ADa09bFa4EC4D7', '_blank')} 
     className="mt-6 bg-gradient-to-r from-green-500 to-blue-600 text-white px-6 py-3 rounded-full hover:scale-105 transition font-semibold shadow-md"
   >
     Visit PancakeSwap
