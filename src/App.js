@@ -1442,7 +1442,7 @@ useEffect(() => {
     🚀 AWT Token is LIVE on PancakeSwap! 🎉
   </h2>
   <p className={`${textSecondary} mb-6 text-lg`}>
-    Get ready! Listing on <a href="https://pancakeswap.finance/swap?inputCurrency=0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c&outputCurrency=0x11d2e5FB3EB729fc829baee1d2ADa09bFa4EC4D7" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-400">PancakeSwap</a> in:
+    🎉 Get ready! Listings are live! 🎉 <a href="https://pancakeswap.finance/swap?inputCurrency=0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c&outputCurrency=0x11d2e5FB3EB729fc829baee1d2ADa09bFa4EC4D7" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-400">PancakeSwap</a> in:
   </p>
   {timeLeft.days > 0 || timeLeft.hours > 0 || timeLeft.minutes > 0 || timeLeft.seconds > 0 ? (
     <div className="grid grid-cols-4 gap-4 max-w-2xl mx-auto">
